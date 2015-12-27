@@ -11,6 +11,7 @@ int main( int argc, char *argv[] ) {
    char buffer[256];
    struct sockaddr_in serv_addr, cli_addr;
    int  n;
+   int quitsign = 0; /* default 0, 1 = quit */
    
    /* First call to socket() function */
    sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -50,25 +51,50 @@ int main( int argc, char *argv[] ) {
    }
    
    /* If connection is established then start communicating */
-   bzero(buffer,256);
-   n = read( newsockfd,buffer,255 );
    
-   if (n < 0) {
-      perror("ERROR reading from socket");
-      exit(1);
-   }
-   
-   printf("Here is the message: %s\n",buffer);
-   
-   /* Write a response to the client */
+   while(!quitsign){
+      bzero(buffer,256);
+      n = read( newsockfd,buffer,255 );
+      
+      if (n < 0) {
+         perror("ERROR reading from socket");
+         exit(1);
+      }
+      
+      /* if other user quits, you also quit program */
+      if (buffer[0]=='q' && buffer[1]=='\n'){
+         quitsign = 1;
+         strcpy(buffer, "user has left the chat");
+         exit(0);
+      }
 
-   n = read(STDIN_FILENO, buffer, 255);
-   n = write(newsockfd,buffer,255);
-   
-   if (n < 0) {
-      perror("ERROR writing to socket");
-      exit(1);
+      printf("Here is the message: %s\n",buffer);
+      
+      /* Write a response to the client */
+
+      bzero(buffer,256);
+      n = read(STDIN_FILENO, buffer, 255);
+
+      /* if I decide to quit, send signal to quit and then quit
+      myself */
+      if (buffer[0]=='q' && buffer[1]=='\n'){
+         quitsign = 1;
+         strcpy(buffer, "user has left the chat");
+      }
+      n = write(newsockfd,buffer,255);
+      
+      /* quit after sending message of 'user has left the chat' to other
+      user */
+      if (quitsign){
+         exit(0);
+      }
+      
+      if (n < 0) {
+         perror("ERROR writing to socket");
+         exit(1);
+      }
    }
+   
       
    return 0;
 }
