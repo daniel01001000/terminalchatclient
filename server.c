@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <unistd.h>
 #include <netdb.h>
 #include <netinet/in.h>
 
@@ -62,7 +62,7 @@ int main( int argc, char *argv[] ) {
    
    /* Write a response to the client */
 
-   n = read(STDIN_O, buffer, 255);
+   n = read(STDIN_FILENO, buffer, 255);
    n = write(newsockfd,buffer,255);
    
    if (n < 0) {
