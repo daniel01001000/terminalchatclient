@@ -11,7 +11,8 @@ int main(int argc, char *argv[]) {
    struct sockaddr_in serv_addr;
    struct hostent *server;
   
-   char buffer[256];
+   char in_buffer[256];
+   char out_buffer[256];
    int quitsign = 0;
    
    if (argc < 3) {
@@ -52,19 +53,18 @@ int main(int argc, char *argv[]) {
    */
 	
    printf("chat room connected\n ");
-   printf("enter text: ");
    while (!quitsign){
-      bzero(buffer,256);
-      fgets(buffer,255,stdin);
+      bzero(out_buffer,256);
+      fgets(out_buffer,255,stdin);
    
       /* if user enter's letter q, quit program */
-      if (buffer[0]=='q' && buffer[1]=='\n'){
+      if (out_buffer[0]=='q' && out_buffer[1]=='\n'){
          quitsign = 1;
-         strcpy(buffer, "user has left the chat");
+         strcpy(out_buffer, "user has left the chat");
       }
 
       /* Send message to the server */
-      n = write(sockfd, buffer, strlen(buffer));
+      n = write(sockfd, out_buffer, strlen(out_buffer));
       
       if (quitsign){
          exit(0);
@@ -76,19 +76,19 @@ int main(int argc, char *argv[]) {
       }
       
       /* Now read server response */
-      bzero(buffer,256);
-      n = read(sockfd, buffer, 255);
+      bzero(in_buffer,256);
+      n = read(sockfd, in_buffer, 255);
       
       if (n < 0) {
          perror("ERROR reading from socket");
          exit(1);
       }
 
-      if ( !strcmp(buffer, "user has left the chat") ) {
+      if ( !strcmp(in_buffer, "user has left the chat") ) {
          exit(0);
       }
 
-      printf("%s\n",buffer);
+      printf("%s\n",in_buffer);
       
       
    }
