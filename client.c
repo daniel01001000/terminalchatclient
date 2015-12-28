@@ -56,8 +56,9 @@ void * reciever( void *socket_addy ) {
 
 
       /*check for recvfrom failure*/
-      if (ret<0) {
+      if (ret<=0) {
          printf("error recieving data");
+         exit(0);
       }
 
 
