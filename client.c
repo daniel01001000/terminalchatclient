@@ -5,21 +5,39 @@
 #include <string.h>
 #include <pthread.h>
 
+struct addy_ptrs {
+	struct sockaddr_in *socky;
+	int * sockyfd;	
+} addys;
+
 
 /* This function recieves messages from other user until
 either I quit or other user sends quit sign */
-void * reciever( void *socket_ptr ) {
+void * reciever( void *socket_addy ) {
    
    char buffer[256];
 
    int sockfd, ret;
    int *sock_ptr;
    int quitsign = 0;
-   
    char *quitptr;
+   struct addys * s_addy;
+   
+   s_addy = (struct addys *)socket_addy;
+   /* sock_ptr = (int*) socket_ptr;*/
+   sockfd = s_addy->sockyfd;
+   
+   listen(sockfd,5);
+   clilen = sizeof(s_addy->socky);
+  
+   /* Accept actual connection from the client */
+   newsockfd = accept(sockfd, (struct sockaddr *)&(s_addy->socky), &clilen);
+  
+   if (newsockfd < 0) {
+      perror("ERROR on accept");
+      exit(1);
+   }
 
-   sock_ptr = (int*) socket_ptr;
-   sockfd = *sock_ptr;
 
    /* while I haven't quit or other user hasn't sent a quit sign 
    continue receiving */
@@ -53,19 +71,19 @@ void * reciever( void *socket_ptr ) {
 }
 
    
-void * caller( struct sockaddr_in *serv_addy ) {
+void * caller( void *socket_addy ) {
 
 
    char buffer[256];
    
    int sockfd, portno, n, ret;
    int quitsign = 0;
-
    char *quitptr;
-
    int connected = 0;
-   
-   sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   struct addys * s_addy;
+
+   s_addy = (struct addys *) socket_addy; 
+   sockfd = s_addy->sockyfd;
 
   
    /* continue writing out until I disconnect */
@@ -78,7 +96,7 @@ void * caller( struct sockaddr_in *serv_addy ) {
       //while ( !connected ) {
          /* Now connect to the server */
          if(strstr(buffer, "connect")){
-            if (connect(sockfd, (struct sockaddr*)serv_addy, sizeof(*serv_addy)) < 0) {
+            if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(socket_addy->socky)) < 0) {
                perror("ERROR connecting");
             } else {
                connected = 1;
@@ -113,14 +131,19 @@ void * caller( struct sockaddr_in *serv_addy ) {
 
 int main(int argc, char *argv[]) {
    
-   int tread_retval, twrite_retval, sockfd, portno;
+   int tread_retval, twrite_retval, 
+   int sockfd_r, sockfd_w; 
+   int portno;
+
    pthread_t tread, twrite;
    
-   struct sockaddr_in serv_addr;
+   struct sockaddr_in serv_addr, cli_addr;
+   struct addys serv_addy, cli_addy;
    struct hostent *server;
-
-   struct sockaddr_in *serv_addy_ptr;
    
+   /*server setup */   
+   bzero((char *) &serv_addr, sizeof(serv_addr));
+
    if (argc < 3) {
       fprintf(stderr,"usage %s hostname port\n", argv[0]);
       exit(0);
@@ -128,13 +151,28 @@ int main(int argc, char *argv[]) {
    
    portno = atoi(argv[2]);
    
-   /* Create a socket point */
-   sockfd = socket(AF_INET, SOCK_STREAM, 0);
-   
+ 
    if (sockfd < 0) {
       perror("ERROR opening socket");
       exit(1);
    }
+      
+   /* listen socket point */ 
+   sockfd_r = socket(AF_INET, SOCK_STREAM, 0);
+   
+   serv_addr.sin_family = AF_INET;
+   serv_addr.sin_addr.s_addr = INADDR_ANY;
+   serv_addr.sin_port = htons(portno); 
+
+   if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr    )) < 0) {
+       perror("ERROR on binding");
+       exit(1);
+   }
+   serv_addy.socky = &serv_addr;
+   serv_addy.sockyfd = &sockfd_r;
+
+   /* Write socket points */
+   bzero((char *) &cli_addr, sizeof(cli_addr));
    
    server = gethostbyname(argv[1]);
    
@@ -142,18 +180,21 @@ int main(int argc, char *argv[]) {
       fprintf(stderr,"ERROR, no such host\n");
       exit(0);
    }
-   
-   bzero((char *) &serv_addr, sizeof(serv_addr));
-   serv_addr.sin_family = AF_INET;
-   bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
-   serv_addr.sin_port = htons(portno);
-   
-   /* set pointer to created serv struct */
-   serv_addy_ptr = &serv_addr;
-   
 
+   sockfd_w = socket(AF_INET, SOCK_STREAM, 0);
+
+   cli_addr.sin_family = AF_INET;
+   bcopy((char *)server->h_addr, (char *)&cli_addr.sin_addr.s_addr, server->h_length);
+   cli_addr.sin_port = htons(portno);
+   
+   
+   cli_addy.socky = &cli_addr;
+   cli_addy.sockyfd = &sockfd_w;
+
+
+     
    /* create read thread, return 0 on success*/
-   tread_retval = pthread_create(&tread, NULL, reciever, (void *) sockfd);
+   tread_retval = pthread_create(&tread, NULL, reciever, &serv_addy);
 
    /* if thread failed, tread_retval will have non-zero val */
    if (tread_retval) {
@@ -162,7 +203,7 @@ int main(int argc, char *argv[]) {
    }
 
    /* create write thread, return 0 on success*/
-   twrite_retval = pthread_create(&twrite, NULL, caller, serv_addy_ptr);
+   twrite_retval = pthread_create(&twrite, NULL, caller, &cli_addy);
 
    /* if thread failed, tread_retval will have non-zero val */
    if (twrite_retval) {
@@ -170,6 +211,11 @@ int main(int argc, char *argv[]) {
       exit(1);
    }     
     
+   
+   //wait for threads to finish
+   pthread_join(tread  ,NULL);
+   pthread_join(twrite  ,NULL);
+   
    
    return 0;
 }
