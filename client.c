@@ -64,8 +64,9 @@ void * reciever( void *socket_addy ) {
       /* check if string has termination msg */
       quitptr = strstr(buffer, "user has left the chat\n");
       if (quitptr!=NULL && buffer[22]=='\0'){
-         quitsign = 1;
+         quitsign = 1;         
       }
+
 
       printf("other user: "); /* 'other user' will be username of other user for now */
       fputs(buffer, stdout); /* print out what I received from other user */
@@ -113,6 +114,7 @@ void * caller( void *socket_addy ) {
       	/* if user enter's letter q, quit program */
       	if (buffer[0]=='q' && buffer[1]=='\n'){
       		quitsign = 1;
+      		printf("quitting...\n");
          	strcpy(buffer, "user has left the chat\n");
         }
 
