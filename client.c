@@ -5,10 +5,10 @@
 #include <string.h>
 #include <pthread.h>
 
-struct addy_ptrs {
+typedef struct {
 	struct sockaddr_in *socky;
-	int * sockyfd;	
-} addys;
+	int *sockyfd;	
+} Addys;
 
 
 /* This function recieves messages from other user until
@@ -19,13 +19,15 @@ void * reciever( void *socket_addy ) {
 
    int sockfd, ret;
    int *sock_ptr;
+   int clilen;
+   int newsockfd;
    int quitsign = 0;
    char *quitptr;
-   struct addys * s_addy;
+   Addys * s_addy;
    
-   s_addy = (struct addys *)socket_addy;
+   s_addy = (Addys *)socket_addy;
    /* sock_ptr = (int*) socket_ptr;*/
-   sockfd = s_addy->sockyfd;
+   sockfd = *(s_addy->sockyfd);
    
    listen(sockfd,5);
    clilen = sizeof(s_addy->socky);
@@ -80,10 +82,10 @@ void * caller( void *socket_addy ) {
    int quitsign = 0;
    char *quitptr;
    int connected = 0;
-   struct addys * s_addy;
+   Addys * s_addy;
 
-   s_addy = (struct addys *) socket_addy; 
-   sockfd = s_addy->sockyfd;
+   s_addy = (Addys *) socket_addy; 
+   sockfd = *(s_addy->sockyfd);
 
   
    /* continue writing out until I disconnect */
@@ -96,7 +98,7 @@ void * caller( void *socket_addy ) {
       //while ( !connected ) {
          /* Now connect to the server */
          if(strstr(buffer, "connect")){
-            if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(socket_addy->socky)) < 0) {
+            if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(s_addy->socky)) < 0) {
                perror("ERROR connecting");
             } else {
                connected = 1;
@@ -131,14 +133,14 @@ void * caller( void *socket_addy ) {
 
 int main(int argc, char *argv[]) {
    
-   int tread_retval, twrite_retval, 
+   int tread_retval, twrite_retval; 
    int sockfd_r, sockfd_w; 
    int portno;
 
    pthread_t tread, twrite;
    
    struct sockaddr_in serv_addr, cli_addr;
-   struct addys serv_addy, cli_addy;
+   Addys serv_addy, cli_addy;
    struct hostent *server;
    
    /*server setup */   
@@ -152,19 +154,21 @@ int main(int argc, char *argv[]) {
    portno = atoi(argv[2]);
    
  
-   if (sockfd < 0) {
-      perror("ERROR opening socket");
-      exit(1);
-   }
+   
       
    /* listen socket point */ 
    sockfd_r = socket(AF_INET, SOCK_STREAM, 0);
    
+   if (sockfd_r < 0) {
+      perror("ERROR opening socket");
+      exit(1);
+   }
+
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_addr.s_addr = INADDR_ANY;
    serv_addr.sin_port = htons(portno); 
 
-   if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr    )) < 0) {
+   if (bind(sockfd_r, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
        perror("ERROR on binding");
        exit(1);
    }
@@ -182,6 +186,11 @@ int main(int argc, char *argv[]) {
    }
 
    sockfd_w = socket(AF_INET, SOCK_STREAM, 0);
+
+   if (sockfd_w < 0) {
+      perror("ERROR opening socket");
+      exit(1);
+   }
 
    cli_addr.sin_family = AF_INET;
    bcopy((char *)server->h_addr, (char *)&cli_addr.sin_addr.s_addr, server->h_length);
