@@ -75,60 +75,51 @@ void * reciever( void *socket_addy ) {
 
    
 void * caller( void *socket_addy ) {
-
-
-   char buffer[256];
+	char buffer[256];
+    int sockfd, portno, n, ret;
+   	int quitsign = 0;
+   	int connected = 0;
+   	char *quitptr;
    
-   int sockfd, portno, n, ret;
-   int quitsign = 0;
-   int connected = 0;
-   char *quitptr;
-   
-   Addys * s_addy;
+   	Addys * s_addy;
 
-   s_addy = (Addys *) socket_addy; 
-   sockfd = *(s_addy->sockyfd);
+   	s_addy = (Addys *) socket_addy; 
+   	sockfd = *(s_addy->sockyfd);
 
   
-   /* continue writing out until I disconnect */
-   while(!quitsign){
+   	/* continue writing out until I disconnect */
+   	while(!quitsign){
+   		memset(buffer, 0, 256);
+      	fgets(buffer,255,stdin);
 
-      memset(buffer, 0, 256);
-      fgets(buffer,255,stdin);
-
-      /* keep attempting to connect */
-      //while ( !connected ) {
-         /* Now connect to the server */
-         if(strstr(buffer, "connect")){
-            if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(*(s_addy->socky))) < 0) {
-               perror("ERROR connecting");
-
+      
+      	/* Now connect to the server */
+        if(strstr(buffer, "connect")){
+        	if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(*(s_addy->socky))) < 0) {
+            	perror("ERROR connecting");
             } else {
-               connected = 1;
-               printf("connected successfully on my end");
+            	connected = 1;
+               	printf("connected successfully on my end");
             }
-         }
-      //}
-
-      
+         }      
    
-      /* if user enter's letter q, quit program */
-      if (buffer[0]=='q' && buffer[1]=='\n'){
-         quitsign = 1;
-         strcpy(buffer, "user has left the chat");
-      }
+      	/* if user enter's letter q, quit program */
+      	if (buffer[0]=='q' && buffer[1]=='\n'){
+      		quitsign = 1;
+         	strcpy(buffer, "user has left the chat");
+        }
 
-      /* Send message to the server */
-      n = write(sockfd, buffer, strlen(buffer));
+      	/* Send message to the server */
+      	n = write(sockfd, buffer, strlen(buffer));
       
-      if (quitsign){
-         exit(0);
-      }
+      	if (quitsign){
+      		exit(0);
+      	}
 
-      if (n < 0) {
-         perror("ERROR writing to socket");
-         exit(1);
-      }
+		if (n < 0) {
+			perror("ERROR writing to socket");
+			exit(1);
+      	}
    }
 }
 
