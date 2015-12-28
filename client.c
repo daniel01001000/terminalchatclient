@@ -6,8 +6,8 @@
 #include <pthread.h>
 
 typedef struct {
-	struct sockaddr_in *socky;
-	int *sockyfd;	
+   struct sockaddr_in *socky;
+   int *sockyfd;  
 } Addys;
 
 
@@ -133,11 +133,7 @@ void * caller( void *socket_addy ) {
 
 int main(int argc, char *argv[]) {
    
-<<<<<<< HEAD
    int tread_retval, twrite_retval; 
-=======
-   int tread_retval, twrite_retval;
->>>>>>> 14bbbac30c9c21986cc8afec7ef72ffde7aef12b
    int sockfd_r, sockfd_w; 
    int portno;
 
@@ -147,11 +143,6 @@ int main(int argc, char *argv[]) {
    Addys serv_addy, cli_addy;
    struct hostent *server;
    
-   /*initialize some variables*/
-   sockfd_r = 0;
-   sockfd_w = 0; 
-   
-      
    /*server setup */   
    bzero((char *) &serv_addr, sizeof(serv_addr));
 
@@ -163,10 +154,7 @@ int main(int argc, char *argv[]) {
    portno = atoi(argv[2]);
    
  
-<<<<<<< HEAD
    
-=======
->>>>>>> 14bbbac30c9c21986cc8afec7ef72ffde7aef12b
       
    /* listen socket point */ 
    sockfd_r = socket(AF_INET, SOCK_STREAM, 0);
@@ -175,11 +163,7 @@ int main(int argc, char *argv[]) {
       perror("ERROR opening socket");
       exit(1);
    }
-<<<<<<< HEAD
 
-=======
-   
->>>>>>> 14bbbac30c9c21986cc8afec7ef72ffde7aef12b
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_addr.s_addr = INADDR_ANY;
    serv_addr.sin_port = htons(portno); 
@@ -202,11 +186,6 @@ int main(int argc, char *argv[]) {
    }
 
    sockfd_w = socket(AF_INET, SOCK_STREAM, 0);
-   
-   if (sockfd_w < 0) {
-      perror("ERROR opening socket");
-      exit(1);
-   }
 
    if (sockfd_w < 0) {
       perror("ERROR opening socket");
