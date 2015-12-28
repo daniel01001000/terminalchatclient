@@ -34,7 +34,7 @@ void * reciever( void *socket_addy ) {
    clilen = sizeof(*(s_addy->socky));
   
    /* Accept actual connection from the client */
-   newsockfd = accept(sockfd, (struct sockaddr *)&(s_addy->socky), &clilen);
+   newsockfd = accept(sockfd, (struct sockaddr *)(s_addy->socky), &clilen);
   
    if (newsockfd < 0) {
       perror("ERROR on accept");
@@ -85,17 +85,20 @@ void * caller( void *socket_addy ) {
 
    	s_addy = (Addys *) socket_addy; 
    	sockfd = *(s_addy->sockyfd);
+   	
 
   
    	/* continue writing out until I disconnect */
    	while(!quitsign){
    		memset(buffer, 0, 256);
       	fgets(buffer,255,stdin);
-
+      	
       
       	/* Now connect to the server */
         if(strstr(buffer, "connect")){
-        	if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(*(s_addy->socky))) < 0) {
+        	
+
+        	if (connect(sockfd, (struct sockaddr*)(s_addy->socky), sizeof(*(s_addy->socky))) < 0) {
             	perror("ERROR connecting");
             } else {
             	connected = 1;
