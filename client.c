@@ -102,7 +102,7 @@ void * caller( void *socket_addy ) {
             	perror("ERROR connecting");
             } else {
             	connected = 1;
-               	printf("connected successfully on my end");
+               	printf("connected successfully on my end\n");
             }
          }      
    
@@ -112,6 +112,7 @@ void * caller( void *socket_addy ) {
          	strcpy(buffer, "user has left the chat");
         }
 
+        
       	/* Send message to the server */
       	n = write(sockfd, buffer, strlen(buffer));
       
