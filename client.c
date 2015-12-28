@@ -56,11 +56,16 @@ void * reciever( void *socket_addy ) {
 
 
       /*check for recvfrom failure*/
-      if (ret<=0) {
+      if (ret<0) {
          printf("error recieving data\n");
-         exit(0);
+         
       }
-
+      /* if other end quits, you quit also */
+      if (ret == 0) {
+      	printf("other user has left the chat\n");
+      	printf("quitting...\n");
+      	exit(0);
+      }
 
       /* check if string has termination msg */
       quitptr = strstr(buffer, "user has left the chat\n");
