@@ -52,7 +52,7 @@ void * reciever( void *socket_addy ) {
       if failure */
       /* ret = recvfrom(sockfd, buffer, 256, 0, NULL, NULL); */
       
-      ret = read(sockfd, buffer, 256);
+      ret = read(newsockfd, buffer, 256);
 
 
       /*check for recvfrom failure*/
