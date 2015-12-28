@@ -62,7 +62,7 @@ void * reciever( void *socket_addy ) {
 
 
       /* check if string has termination msg */
-      quitptr = strstr(buffer, "user has left the chat");
+      quitptr = strstr(buffer, "user has left the chat\n");
       if (quitptr!=NULL && buffer[22]=='\0'){
          quitsign = 1;
       }
@@ -113,7 +113,7 @@ void * caller( void *socket_addy ) {
       	/* if user enter's letter q, quit program */
       	if (buffer[0]=='q' && buffer[1]=='\n'){
       		quitsign = 1;
-         	strcpy(buffer, "user has left the chat");
+         	strcpy(buffer, "user has left the chat\n");
         }
 
 
