@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
    } 
    
    portno_r = atoi(argv[2]);
-   portno_r = atoi(argv[3]);
+   portno_w = atoi(argv[3]);
    
       
    /* listen socket point */ 
