@@ -50,7 +50,11 @@ void * reciever( void *socket_addy ) {
 
       /* recvfrom returns length of message in bytes; return negative
       if failure */
-      ret = recvfrom(sockfd, buffer, 256, 0, NULL, NULL);
+      /* ret = recvfrom(sockfd, buffer, 256, 0, NULL, NULL); */
+      
+      ret = read(sockfd, buffer, 256);
+
+
       /*check for recvfrom failure*/
       if (ret<0) {
          printf("error recieving data");
@@ -112,7 +116,7 @@ void * caller( void *socket_addy ) {
          	strcpy(buffer, "user has left the chat");
         }
 
-        
+
       	/* Send message to the server */
       	n = write(sockfd, buffer, strlen(buffer));
       
