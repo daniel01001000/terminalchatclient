@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <pthread.h>
+#include <errno.h>
 
 typedef struct {
    struct sockaddr_in *socky;
@@ -30,7 +31,7 @@ void * reciever( void *socket_addy ) {
    sockfd = *(s_addy->sockyfd);
    
    listen(sockfd,5);
-   clilen = sizeof(s_addy->socky);
+   clilen = sizeof(*(s_addy->socky));
   
    /* Accept actual connection from the client */
    newsockfd = accept(sockfd, (struct sockaddr *)&(s_addy->socky), &clilen);
@@ -80,8 +81,9 @@ void * caller( void *socket_addy ) {
    
    int sockfd, portno, n, ret;
    int quitsign = 0;
-   char *quitptr;
    int connected = 0;
+   char *quitptr;
+   
    Addys * s_addy;
 
    s_addy = (Addys *) socket_addy; 
@@ -98,10 +100,12 @@ void * caller( void *socket_addy ) {
       //while ( !connected ) {
          /* Now connect to the server */
          if(strstr(buffer, "connect")){
-            if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(s_addy->socky)) < 0) {
+            if (connect(sockfd, (struct sockaddr*)&(s_addy->socky), sizeof(*(s_addy->socky))) < 0) {
                perror("ERROR connecting");
+
             } else {
                connected = 1;
+               printf("connected successfully on my end");
             }
          }
       //}
