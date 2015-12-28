@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
    
    int tread_retval, twrite_retval; 
    int sockfd_r, sockfd_w; 
-   int portno;
+   int portno_r, portno_w;
 
    pthread_t tread, twrite;
    
@@ -154,9 +154,8 @@ int main(int argc, char *argv[]) {
       exit(0);
    } 
    
-   portno = atoi(argv[2]);
-   
- 
+   portno_r = atoi(argv[2]);
+   portno_r = atoi(argv[3]);
    
       
    /* listen socket point */ 
@@ -169,7 +168,7 @@ int main(int argc, char *argv[]) {
 
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_addr.s_addr = INADDR_ANY;
-   serv_addr.sin_port = htons(portno); 
+   serv_addr.sin_port = htons(portno_r); 
 
    if (bind(sockfd_r, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
        perror("ERROR on binding");
@@ -197,7 +196,7 @@ int main(int argc, char *argv[]) {
 
    cli_addr.sin_family = AF_INET;
    bcopy((char *)server->h_addr, (char *)&cli_addr.sin_addr.s_addr, server->h_length);
-   cli_addr.sin_port = htons(portno);
+   cli_addr.sin_port = htons(portno_w);
    
    
    cli_addy.socky = &cli_addr;
