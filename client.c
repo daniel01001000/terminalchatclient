@@ -131,7 +131,7 @@ void * caller( void *socket_addy ) {
 
 int main(int argc, char *argv[]) {
    
-   int tread_retval, twrite_retval, 
+   int tread_retval, twrite_retval;
    int sockfd_r, sockfd_w; 
    int portno;
 
@@ -141,6 +141,11 @@ int main(int argc, char *argv[]) {
    struct addys serv_addy, cli_addy;
    struct hostent *server;
    
+   /*initialize some variables*/
+   sockfd_r = 0;
+   sockfd_w = 0; 
+   
+      
    /*server setup */   
    bzero((char *) &serv_addr, sizeof(serv_addr));
 
@@ -152,13 +157,14 @@ int main(int argc, char *argv[]) {
    portno = atoi(argv[2]);
    
  
-   if (sockfd < 0) {
-      perror("ERROR opening socket");
-      exit(1);
-   }
       
    /* listen socket point */ 
    sockfd_r = socket(AF_INET, SOCK_STREAM, 0);
+   
+   if (sockfd_r < 0) {
+      perror("ERROR opening socket");
+      exit(1);
+   }
    
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -182,6 +188,11 @@ int main(int argc, char *argv[]) {
    }
 
    sockfd_w = socket(AF_INET, SOCK_STREAM, 0);
+   
+   if (sockfd_w < 0) {
+      perror("ERROR opening socket");
+      exit(1);
+   }
 
    cli_addr.sin_family = AF_INET;
    bcopy((char *)server->h_addr, (char *)&cli_addr.sin_addr.s_addr, server->h_length);
