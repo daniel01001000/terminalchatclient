@@ -37,7 +37,7 @@ void * reciever( void *socket_addy ) {
    newsockfd = accept(sockfd, (struct sockaddr *)(s_addy->socky), &clilen);
   
    if (newsockfd < 0) {
-      perror("ERROR on accept");
+      perror("ERROR on accept\n");
       exit(1);
    }
 
@@ -57,7 +57,7 @@ void * reciever( void *socket_addy ) {
 
       /*check for recvfrom failure*/
       if (ret<=0) {
-         printf("error recieving data");
+         printf("error recieving data\n");
          exit(0);
       }
 
@@ -105,7 +105,7 @@ void * caller( void *socket_addy ) {
         	
 
         	if (connect(sockfd, (struct sockaddr*)(s_addy->socky), sizeof(*(s_addy->socky))) < 0) {
-            	perror("ERROR connecting");
+            	perror("ERROR connecting\n");
             } else {
             	connected = 1;
                	printf("connected successfully on my end\n");
@@ -128,7 +128,7 @@ void * caller( void *socket_addy ) {
       	}
 
 		if (n < 0) {
-			perror("ERROR writing to socket");
+			perror("ERROR writing to socket\n");
 			exit(1);
       	}
    }
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
    sockfd_r = socket(AF_INET, SOCK_STREAM, 0);
    
    if (sockfd_r < 0) {
-      perror("ERROR opening socket");
+      perror("ERROR opening socket\n");
       exit(1);
    }
 
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
    serv_addr.sin_port = htons(portno_r); 
 
    if (bind(sockfd_r, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-       perror("ERROR on binding");
+       perror("ERROR on binding\n");
        exit(1);
    }
    serv_addy.socky = &serv_addr;
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
    sockfd_w = socket(AF_INET, SOCK_STREAM, 0);
 
    if (sockfd_w < 0) {
-      perror("ERROR opening socket");
+      perror("ERROR opening socket\n");
       exit(1);
    }
 
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
 
    /* if thread failed, tread_retval will have non-zero val */
    if (tread_retval) {
-      printf("error creating read thread");
+      printf("error creating read thread\n");
       exit(1);
    }
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 
    /* if thread failed, tread_retval will have non-zero val */
    if (twrite_retval) {
-      printf("error creating write thread");
+      printf("error creating write thread\n");
       exit(1);
    }     
     
